@@ -1,10 +1,12 @@
 import React, { Component } from "react";
-import { Route, Switch, Redirect, Link } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
-import Series from "./containers/Series";
-import Movies from "./containers/Movies";
-import Home from "./containers/Home";
+import Series from "./components/Series";
+import Movies from "./components/Movies";
+import Home from "./components/Home";
+import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
 
 class App extends Component {
   constructor(props) {
@@ -14,10 +16,10 @@ class App extends Component {
 
   async componentDidMount() {
     try {
-      const data = await axios.get(
+      const result = await axios.get(
         "https://raw.githubusercontent.com/StreamCo/react-coding-challenge/master/feed/sample.json"
       );
-      const entries = data.data.entries
+      const entries = result.data.entries
         .filter(ent => ent.releaseYear >= 2010)
         .sort((a, b) => {
           const titleA = a.title.toLowerCase();
@@ -36,61 +38,38 @@ class App extends Component {
   }
 
   render() {
+    if (this.state.error) {
+      return (
+        <section>
+          <NavBar />
+          <h2>Oops, something went wrong</h2>
+          <Footer />
+        </section>
+      );
+    }
     return (
       <section
         className="App"
         style={{ position: "relative", minHeight: "100vh" }}
       >
-        <nav
-          style={{
-            display: "flex",
-            justifyContent: "space-around",
-            backgroundColor: "black",
-            color: "white"
-          }}
-        >
-          <h1>DEMO Streaming</h1>
-          <div style={{ display: "flex" }}>
-            <h3>Log In</h3>
-            <h3>Start your free trial</h3>
-            <Link to="/home">Home</Link>
-          </div>
-        </nav>
-        {this.state.error ? (
-          <h2>"Oops, something went wrong"</h2>
-        ) : (
-          <Switch>
-            <Route
-              path="/series"
-              component={props => (
-                <Series entries={this.state.entries} {...props} />
-              )}
-            />
-            <Route
-              path="/movies"
-              component={props => (
-                <Movies entries={this.state.entries} {...props} />
-              )}
-            />
-            <Route path="/home" component={Home} />
-            <Redirect to="/home" />
-          </Switch>
-        )}
-        <footer
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: "50px",
-            display: "flex",
-            justifyContent: "space-around",
-            backgroundColor: "black",
-            color: "white"
-          }}
-        >
-          <div>Facebook</div>
-          <div>Twitter</div>
-        </footer>
+        <NavBar />
+        <Switch>
+          <Route
+            path="/series"
+            component={props => (
+              <Series entries={this.state.entries} {...props} />
+            )}
+          />
+          <Route
+            path="/movies"
+            component={props => (
+              <Movies entries={this.state.entries} {...props} />
+            )}
+          />
+          <Route path="/home" component={Home} />
+          <Redirect to="/home" />
+        </Switch>
+        <Footer />
       </section>
     );
   }
